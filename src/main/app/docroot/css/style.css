@@ -1,0 +1,35 @@
+/* Put your CSS here */
+html, body {
+    margin: 20px;
+}
+
+a {
+  cursor: pointer;
+}
+
+.navbar .nav > li > a.active {
+  color: black;
+  font-weight: bold;
+}
+
+.about {
+  padding-bottom: 15px;
+  width: 700px;
+}
+
+.about + .about {
+  padding-top: 25px;
+  border-top: 1px solid #000;
+}
+
+thead > tr, tbody{
+    display: block;
+}
+
+h1.main {
+    text-align: center;
+}
+
+div.below-the-fold h1 {
+    font-size: 23px;
+}
