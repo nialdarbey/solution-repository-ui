@@ -75,7 +75,9 @@ Api.User = Milo.Model.extend({
 
 App.Router.map(function() {
   this.route('home');
-  this.resource('demos');
+  this.resource('demos', function() {
+    this.resource('demo', { path: '/:demo_id' });
+  });
   this.resource('repositories', function() {
     this.resource('repository', { path: '/:repository_id' });
   });
@@ -106,11 +108,7 @@ App.PrivateRoute = Ember.Route.extend({
     } 
   },
 
-  redirectToLogin: function(transition) {
-    var loginController = this.controllerFor('login');
-    loginController.set('attemptedTransition', transition);
-    this.transitionTo('login');
-  },
+  
 
   events: {
     error: function(reason, transition) {
@@ -140,13 +138,19 @@ App.LogoutRoute = Ember.Route.extend({
 
 App.RepositoriesRoute = App.PrivateRoute.extend({
   model: function() {
-    return Api.Repository.where({ owner: this.controllerFor('application').get('githubUsername')}).findMany();
+    var self = this;
+    return Api.Repository.where({ owner: this.controllerFor('application').get('githubUsername')}).findMany().fail(function() {
+      self.transitionTo('login');
+    });
   }
 });
 
 App.RepositoryRoute = App.PrivateRoute.extend({
   model: function(params) {
-    return Api.Repository.where({repository_id : params.repository_id, owner: this.controllerFor('application').get('githubUsername') }).findOne();
+    var self = this;
+    return Api.Repository.where({repository_id : params.repository_id, owner: this.controllerFor('application').get('githubUsername') }).findOne().fail(function() {
+      self.transitionTo('login');
+    });;
   },
   serialize: function(model, params) {
     return { 
@@ -165,7 +169,10 @@ App.RepositoryRoute = App.PrivateRoute.extend({
 
 App.DemosRoute = App.PrivateRoute.extend({
   model: function() {
-    return Api.Demo.findMany();
+    var self = this;
+    return Api.Demo.findMany().fail(function() {
+      self.transitionTo('login');
+    });;
   }
 });
 App.DemoRoute = App.PrivateRoute.extend({
@@ -267,10 +274,11 @@ App.LoginController = Ember.Controller.extend({
     var tokenDate = new Date();
     $.getJSON(drTokenRequestUrl).done(function(drToken) {
       if (drToken) {
+        Api.queryParams('access_token', drToken.access_token);
         var attemptedTransition = self.get('attemptedTransition');
         Api.User.where({ id : credentials.username }).findOne()
           .done(function(user) {
-              var asrTokenRequestUrl = App.asrTokenRequestTemplate.replace('USER_NAME', user.srUser).replace('PASS_WORD', user.srPass);
+              var asrTokenRequestUrl = App.asrTokenRequestTemplate.replace('USER_NAME', user.get('srUser')).replace('PASS_WORD', user.get('srPass'));
               $.getJSON(asrTokenRequestUrl)
                 .done(function(asrToken) {
                   if (asrToken) {
@@ -281,7 +289,6 @@ App.LoginController = Ember.Controller.extend({
                     self.get('controllers.application').set('drToken', drToken.access_token);
                     self.get('controllers.application').set('drTokenTimestamp', tokenDate);
                     self.get('controllers.application').set('drTokenExpiration', drToken.expires_in);
-                    Api.queryParams('access_token', drToken.access_token);
                     Api.queryParams('asrToken', asrToken.access_token);
                     if (attemptedTransition) {
                       attemptedTransition.retry();
@@ -293,7 +300,8 @@ App.LoginController = Ember.Controller.extend({
                   }
                 })
                 .fail(function(e) {
-                  
+                  self.set('errorMessage', 'Sorry, ' + credentials.username + ', but there has been a problem communicating with Anypoint Service Registry!');
+                  self.transitionToRoute('login');
                 })
           })
           .fail(function(e) {
@@ -325,7 +333,7 @@ App.RepositoryController = Ember.ObjectController.extend({
     needs: ['application'],
     
     loadReadMe: function(model) {
-      Api.RepositoryReadMe.where({access_token: this.get('controllers.application').get('drToken'), repository_id : this.get('name'), owner : App.applicationController.get('githubUsername')}).findOne()
+      Api.RepositoryReadMe.where({repository_id : this.get('name'), owner : App.applicationController.get('githubUsername')}).findOne()
         .done(function(data) {
           var text = data.get('readMe');
           model.set('readMe', text);
@@ -349,7 +357,6 @@ App.RepositoryController = Ember.ObjectController.extend({
       demo.save().done(function() {
         alert('registered');
       });
-      console.log(this.get('name'));
     }
  });
 

@@ -105,27 +105,37 @@
     </div>
   </script>
     <script type="text/x-handlebars" id="demo">
-    <p>Demo</p>
+    <h3>{{name}}</h3>
+    <hr>
+    <div class='below-the-fold'>
+      
+    </div>
   </script>
     <script type="text/x-handlebars" id="demos">
     <div class="container-fluid">
       <div class="row-fluid">
-        <div class="span6">
-          <table class='table'>
-            <thead>
-              <tr><th>Name</th><th>Summary</th></tr>
-            </thead>
-            <tbody style="height: 450px; overflow: auto">
-              {{#each controller}}
+        <div class="span5">
+          <table class='table' style="height: 450px; overflow: auto">
+          <thead>
+            <tr><th>Name</th><th>Summary</th></tr>
+          </thead>
+          <tbody style="height: 400px; overflow: auto">
+            {{#each controller}}
               <tr>
-                <td>{{name}}</td>
+                <td>{{#linkTo 'demo' this}}{{name}} {{/linkTo}}</td>
                 <td>{{summary}}</td>
               </tr>
-              {{/each}}
-            </tbody>
-          </table>
+            {{else}}
+              {{#if content.isLoaded}}
+                <tr>
+                  <td>No Demos found</td>
+                </tr>
+              {{/if}}
+            {{/each}}
+          </tbody>
+        </table>
         </div>
-        <div class="span6" style="height: 450px; overflow: auto">
+        <div class="span7" style="height: 450px; overflow: auto">
           {{outlet}}
         </div>
       </div>

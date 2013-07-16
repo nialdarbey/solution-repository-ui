@@ -55,7 +55,7 @@
             </property-collection>
         </properties>
     </global-element>
-    <flow SubFlow="false" name="ui" entity-id="8fdaa1cd-82eb-4054-9176-e9e383d76e70">
+    <flow SubFlow="false" name="ui" entity-id="fef64818-5530-45a4-bbe8-281581724098">
         <properties>
             <property name="processingStrategy"/>
             <property name="processingStrategy2"/>
