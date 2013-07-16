@@ -108,8 +108,13 @@
     <h3>{{name}}</h3>
     <hr>
     <div class='below-the-fold'>
-      
+      {{outlet}}
     </div>
+  </script>
+  <script type="text/x-handlebars" id="configs">
+    {{#if content.configs}}
+      {{markdown content.configs}}
+    {{/if}}
   </script>
     <script type="text/x-handlebars" id="demos">
     <div class="container-fluid">
@@ -136,7 +141,8 @@
         </table>
         </div>
         <div class="span7" style="height: 450px; overflow: auto">
-          {{outlet}}
+          {{outlet description}}
+          {{outlet configs}}
         </div>
       </div>
     </div>

@@ -1,9 +1,10 @@
 App = Ember.Application.create({
   LOG_TRANSITIONS: true,
   asrTokenRequestTemplate: 'https://registry.mulesoft.com:443/api/access-token?grant_type=password&client_id=WEBUI&username=USER_NAME&password=PASS_WORD&scope=READ_SERVICES%20WRITE_SERVICES%20 CONSUME_SERVICES%20 APPLY_POLICIES%20READ_CONSUMERS%20WRITE_CONSUMERS%20 CONTRACT_MGMT%20 CONSUME_POLICIES',
-  drTokenRequestTemplate: 'https://demo-repository-api.cloudhub.io/access-token?grant_type=password&client_id=web-ui&username=USER_NAME&password=PASS_WORD&scope=READ%20WRITE',
-  applicationController: null
+  drTokenRequestTemplate: 'https://demo-repository-api.cloudhub.io/access-token?grant_type=password&client_id=web-ui&username=USER_NAME&password=PASS_WORD&scope=READ%20WRITE'
 });
+
+$.ajaxSetup({ cache: false });
 
 /* demo-repository-api.cloudhub.io
 
@@ -25,7 +26,8 @@ Api.Demo = Milo.Model.extend({
     releaseNotes: Milo.property('string'),
     url: Milo.property('string'),
     type: Milo.property('string'),
-    version: Milo.property('string')
+    version: Milo.property('string'),
+    configs: Milo.property('string')
 });
 Api.Repository = Milo.Model.extend({
     rootElement: 'repositories',
@@ -37,7 +39,12 @@ Api.RepositoryReadMe = Milo.Model.extend({
     rootElement: 'readMe',
     uriTemplate: '/repositories/:repository_id/read-me',
     readMe: Milo.property('string')
-})
+});
+Api.RepositoryConfigs = Milo.Model.extend({
+    rootElement: 'configs',
+    uriTemplate: '/repositories/:repository_id/configs',
+    configs: Milo.property('string')
+});
 Api.RepositoryOwner = Milo.Model.extend({
     login: Milo.property('string')
 });
@@ -176,6 +183,25 @@ App.DemosRoute = App.PrivateRoute.extend({
   }
 });
 App.DemoRoute = App.PrivateRoute.extend({
+  model: function(params) {
+    var self = this;
+    return Api.Demo.where({demo_id : params.demo_id}).findOne().fail(function() {
+      self.transitionTo('login');
+    });;
+  },
+  serialize: function(model, params) {
+    return { 
+      demo_id: model.get('name') 
+    };
+  },
+  renderTemplate: function(controller, model) {
+    /*controller.loadConfigs(model);
+    this.render();
+    this.render('configs', {   // the template to render
+      into: 'demo',          // the template to render into
+      controller: 'configs'  // the controller to use for the template
+    });*/
+  }
 });
 App.GistsRoute = Ember.Route.extend({});
 App.SnippetsRoute = Ember.Route.extend({});
@@ -333,7 +359,7 @@ App.RepositoryController = Ember.ObjectController.extend({
     needs: ['application'],
     
     loadReadMe: function(model) {
-      Api.RepositoryReadMe.where({repository_id : this.get('name'), owner : App.applicationController.get('githubUsername')}).findOne()
+      Api.RepositoryReadMe.where({repository_id : this.get('name'), owner : this.get('controllers.application').get('githubUsername')}).findOne()
         .done(function(data) {
           var text = data.get('readMe');
           model.set('readMe', text);
@@ -359,6 +385,24 @@ App.RepositoryController = Ember.ObjectController.extend({
       });
     }
  });
+
+App.DemoController = Ember.ObjectController.extend({
+  needs: ['application'],
+  
+  loadConfigs: function(model) {
+    Api.RepositoryConfigs.where({repository_id : this.get('name'), owner : this.get('controllers.application').get('githubUsername')}).findOne()
+      .done(function(data) {
+        var text = data.get('configs');
+        model.set('configs', text);
+      })
+      .fail(function(e) {
+        model.set('configs', e[0].statusText);
+      });
+  }
+
+});
+
+
 
 
 /**
