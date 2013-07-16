@@ -26,6 +26,22 @@ thead > tr, tbody{
     display: block;
 }
 
+table {
+	table-layout: fixed;
+}
+
+td:first-child, th:first-child {
+	width: 40%;
+}
+
+table tbody tr.highlight td {
+    background-color: #FFFF99;
+}
+
+table tbody tr:hover {
+	background-color: #FFFFCC;
+}
+
 h1.main {
     text-align: center;
 }

@@ -55,7 +55,7 @@
             </property-collection>
         </properties>
     </global-element>
-    <flow SubFlow="false" name="ui" entity-id="142b6178-4727-4a8c-8b82-98ab8d4f7c72">
+    <flow SubFlow="false" name="ui" entity-id="8fdaa1cd-82eb-4054-9176-e9e383d76e70">
         <properties>
             <property name="processingStrategy"/>
             <property name="processingStrategy2"/>
@@ -68,7 +68,7 @@
             <endpoint direction="Inbound" message-exchange-pattern="RequestResponse" name="localhost/ui" type="http://www.mulesoft.org/schema/mule/http/endpoint" entity-id="HTTP#1">
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
-                    <property name="port" value="${http.port}"/>
+                    <property name="port" value="${https.port}"/>
                     <property name="host" value="localhost"/>
                     <property name="businessEventsLabel"/>
                     <property name="followRedirects"/>
@@ -97,7 +97,7 @@
             </endpoint>
             <unknown description="false" index="6" entity-id="unknown#1">
                 <graphicalData x="0" y="0" width="0" height="0"/>
-                <content>&lt;http:static-resource-handler xmlns:http=&quot;http://www.mulesoft.org/schema/mule/http&quot; resourceBase=&quot;${app.home}/docroot&quot; defaultFile=&quot;index.html&quot;/&gt;</content>
+                <content>&lt;https:static-resource-handler xmlns:https=&quot;http://www.mulesoft.org/schema/mule/https&quot; resourceBase=&quot;${app.home}/docroot&quot; defaultFile=&quot;index.html&quot;/&gt;</content>
             </unknown>
         </lane>
     </flow>

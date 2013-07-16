@@ -11,8 +11,8 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
         <https:tls-key-store path="keystore.jks" keyPassword="changeit" storePassword="changeit"/>
     </https:connector>
     <flow name="ui" doc:name="ui">
-        <https:inbound-endpoint exchange-pattern="request-response" host="localhost" path="ui" port="${http.port}" doc:name="localhost/ui" connector-ref="httpsConnector"/>
-        <http:static-resource-handler resourceBase="${app.home}/docroot" defaultFile="index.html"/>
+        <https:inbound-endpoint exchange-pattern="request-response" host="localhost" path="ui" port="${https.port}" doc:name="localhost/ui" connector-ref="httpsConnector"/>
+        <https:static-resource-handler resourceBase="${app.home}/docroot" defaultFile="index.html"/>
     </flow>
 
 </mule>
