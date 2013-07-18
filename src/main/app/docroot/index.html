@@ -6,6 +6,8 @@
 <link rel="stylesheet" href="css/normalize.css">
 <link rel="stylesheet" href="css/bootstrap.css">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="js/libs/high/styles/idea.css">
+    
 </head>
 <body>
     <script type="text/x-handlebars">
@@ -111,9 +113,9 @@
       {{outlet}}
     </div>
   </script>
-  <script type="text/x-handlebars" id="configs">
+    <script type="text/x-handlebars" id="configs">
     {{#if content.configs}}
-      {{markdown content.configs}}
+      {{content.configs}}
     {{/if}}
   </script>
     <script type="text/x-handlebars" id="demos">
@@ -141,8 +143,7 @@
         </table>
         </div>
         <div class="span7" style="height: 450px; overflow: auto">
-          {{outlet description}}
-          {{outlet configs}}
+          {{outlet }}
         </div>
       </div>
     </div>
@@ -160,5 +161,7 @@
     <script src="js/libs/moment.js"></script>
     <script src="js/libs/milo.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/libs/vkbeautify.0.99.00.beta.js"></script>
+    <script src="js/libs/high/highlight.pack.js"></script>
 </body>
 </html>

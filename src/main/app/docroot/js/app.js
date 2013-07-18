@@ -195,12 +195,12 @@ App.DemoRoute = App.PrivateRoute.extend({
     };
   },
   renderTemplate: function(controller, model) {
-    /*controller.loadConfigs(model);
+    controller.loadConfigs(model);
     this.render();
     this.render('configs', {   // the template to render
       into: 'demo',          // the template to render into
       controller: 'configs'  // the controller to use for the template
-    });*/
+    });
   }
 });
 App.GistsRoute = Ember.Route.extend({});
@@ -411,10 +411,19 @@ App.DemoController = Ember.ObjectController.extend({
 
 App.RepositoriesView = Em.View.extend({
   didInsertElement: function () {
-    $('tbody tr').hover(function(event) {
+    $('tbody tr').click(function(event) {
       $(this).addClass('highlight').siblings().removeClass('highlight');
     });
   }
+});
+
+App.ConfigsView = Em.View.extend({
+  didInsertElement: function () {
+    var t = $('div.mule-config').text();
+    $('div.mule-config').prepend(t);
+    $('div.mule-config configs').each(function(i, e) {hljs.highlightBlock(e, null, true)});
+  },
+  layout: Ember.Handlebars.compile('<div class="mule-config"><pre><code>{{yield}}</code></pre></div>')
 });
 
 
@@ -430,4 +439,8 @@ Ember.Handlebars.registerBoundHelper('markdown', function(input) {
 
 Ember.Handlebars.registerBoundHelper('date', function(date) {
   return moment(date).fromNow();
+});
+
+Ember.Handlebars.registerBoundHelper("showXml", function(xml) {
+  return vkbeautify.xml(xml);
 });
