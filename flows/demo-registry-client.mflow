@@ -37,15 +37,8 @@
             <property name="dynamicNotification"/>
             <property name="sendBufferSize" value="0"/>
             <property name="ENABLE_MODE_SWITCH"/>
-            <property name="proxyPassword"/>
             <property name="auxiliary;index" value="2"/>
-            <property-collection name="@http://www.mulesoft.org/schema/mule/https/tls-key-store;0">
-                <property name="path" value="keystore.jks"/>
-                <property name="storePassword" value="changeit"/>
-                <property name="keyPassword" value="changeit"/>
-                <property name="auxiliary;index" value="3"/>
-                <property name="auxiliary;wrapIn" value="3"/>
-            </property-collection>
+            <property name="proxyPassword"/>
             <property-collection name="@http://www.mulesoft.org/schema/mule/https/tls-key-store;0">
                 <property name="path" value="keystore.jks"/>
                 <property name="storePassword" value="changeit"/>
@@ -55,13 +48,13 @@
             </property-collection>
         </properties>
     </global-element>
-    <flow SubFlow="false" name="ui" entity-id="fef64818-5530-45a4-bbe8-281581724098">
+    <flow SubFlow="false" name="ui" entity-id="1f61283d-4a70-4de6-ad63-0d42d2b0464b">
         <properties>
             <property name="processingStrategy"/>
             <property name="processingStrategy2"/>
             <property name="bussinessEventsLabel"/>
-            <property name="tracking:enable-default-events"/>
             <property name="auxiliary;index" value="4"/>
+            <property name="tracking:enable-default-events"/>
         </properties>
         <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="compartment-lane#1">
             <graphicalData x="0" y="0" width="0" height="0"/>
@@ -69,29 +62,29 @@
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
                     <property name="port" value="${https.port}"/>
+                    <property name="contentType"/>
+                    <property name="password"/>
+                    <property name="tracking:enable-default-events"/>
+                    <property name="exchange-pattern" value="request-response"/>
+                    <property name="encoding"/>
+                    <property name="path" value="ui"/>
+                    <property name="responseTransformer-refs"/>
+                    <property name="auxiliary;index" value="5"/>
+                    <property name="connector-ref-outbound" value="httpsConnector"/>
+                    <property name="mimeType"/>
+                    <property name="responseTimeout"/>
                     <property name="host" value="localhost"/>
                     <property name="businessEventsLabel"/>
                     <property name="followRedirects"/>
                     <property name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute" value="http://www.mulesoft.org/schema/mule/https/endpoint"/>
                     <property name="keep-alive"/>
-                    <property name="contentType"/>
                     <property name="disableTransportTransformer"/>
-                    <property name="password"/>
-                    <property name="exchange-pattern" value="request-response"/>
-                    <property name="tracking:enable-default-events"/>
                     <property name="ref"/>
-                    <property name="transformer-refs"/>
                     <property name="httpLabel"/>
+                    <property name="transformer-refs"/>
                     <property name="address"/>
-                    <property name="path" value="ui"/>
-                    <property name="encoding"/>
-                    <property name="responseTransformer-refs"/>
                     <property name="method"/>
                     <property name="user"/>
-                    <property name="connector-ref-outbound" value="httpsConnector"/>
-                    <property name="responseTimeout"/>
-                    <property name="mimeType"/>
-                    <property name="auxiliary;index" value="5"/>
                     <property name="connector-ref" value="httpsConnector"/>
                 </properties>
             </endpoint>
@@ -100,6 +93,7 @@
                 <content>&lt;https:static-resource-handler xmlns:https=&quot;http://www.mulesoft.org/schema/mule/https&quot; resourceBase=&quot;${app.home}/docroot&quot; defaultFile=&quot;index.html&quot;/&gt;</content>
             </unknown>
         </lane>
+        <apikit>false</apikit>
     </flow>
     <description></description>
 </mule-configuration>

@@ -1,0 +1,28 @@
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span5" style="height: 750px; overflow: auto">
+            <div class="row-fluid">
+                <div class="span12">
+                    <table class='table table-bordered table-hover'>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>
+                                    <span>Description<span>
+                                    <img ng-click="filterOff()" ng-show="isFiltered()" class="pull-right link" src="img/filter-icon.png" popover-placement="top" popover="{{'Filtered by ' + filter()}}" popover-trigger="mouseenter"/>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody style="height: 700px; overflow: auto">
+                            <tr ng-class="{ selected : isSelected(demo) }" ng-repeat="demo in demos.collection.items | orderBy:'name'">
+                                <td><a href="#{{demo.href}}">{{demo | data:'name'}}</a></td>
+                                <td>{{demo | data:'description'}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="span7" ui-view></div>
+    </div>
+</div>

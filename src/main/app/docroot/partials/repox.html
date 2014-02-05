@@ -1,0 +1,12 @@
+<h3>{{repository.name}}</h3>
+<button x-ng-hide="published()" class="btn btn-primary" ng-click="showForm()">Publish</button>
+<button x-ng-show="published()" class="btn-success">Published</button>
+
+<h2>
+    <small class='muted'>(Created <span x-moment="repository.createdAt"></span>)
+    </small>
+</h2>
+<hr>
+<div class='below-the-fold'>
+    <div x-showdown="readMe"></div>
+</div>

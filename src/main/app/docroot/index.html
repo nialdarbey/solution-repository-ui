@@ -1,167 +1,84 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en" ng-app="demo-repository">
 <head>
-<meta charset=utf-8 />
+<meta charset="utf-8">
 <title>Mule Demo Repository</title>
 <link rel="stylesheet" href="css/normalize.css">
-<link rel="stylesheet" href="css/bootstrap.css">
+<link href="css/bootstrap.css" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="js/libs/high/styles/idea.css">
-    
+<link rel="stylesheet" href="lib/high/styles/github.css">
+<link rel="stylesheet" href="css/bootstrap-tag-cloud.css">
+<link href="lib/angular-xeditable-0.1.4/css/xeditable.css" rel="stylesheet">
 </head>
-<body>
-    <script type="text/x-handlebars">
-  <div class="container-fluid">
-    <div class="row-fluid" id="home">
-      <h1 class="main">Mule Demo Repository</h1>
+<body ng-controller="MainCtrl">
+    <div id="banner" class="row-fluid">
+        <h1 class="main">MuleSoft Demo Repository</h1>
+        <div ng-show="signedIn()" class="header_search pull-right" ng-cloak>
+            <button popover-placement="left" popover="{{searchCriteria.target.description}}" popover-trigger="mouseenter" class="btn" ng-click="toggleSearchTarget()">{{searchCriteria.target.label}}</button>
+            <form ng-submit="search()">
+                <input class="typeahead" type="text" placeholder="{{searchCriteria.target.hint}}" bs-typeahead="{{searchCriteria.target.suggestions}}" ng-model="searchCriteria.text"/>
+            </form>
+            <a class="btn btn-primary ng-scope" ui-sref="demos.search" popover-placement="bottom" popover="Advanced Search Form" popover-trigger="mouseenter" href="#/demos/search">
+                    <i class="icon-search icon-white"></i>
+                </a>
+        </div>
     </div>
+    <div alert-bar x-alertmessage="errorService.errorMessage"></div>
     <div class="navbar">
-      <div class="navbar-inner">
-        <ul class="nav pull-right">
-          <li>{{#linkTo home}}Home{{/linkTo}}</li>
-          {{#if loginExpired}}
-            <li>{{#linkTo login}}Login{{/linkTo}}</li>
-          {{else}}
-            <li>{{#linkTo repositories}}Repositories{{/linkTo}}</li>
-            <li>{{#linkTo demos}}Demos{{/linkTo}}</li>
-            <li>{{#linkTo gists}}Gits{{/linkTo}}</li>
-            <li>{{#linkTo snippets}}Snippets{{/linkTo}}</li>
-            <li>{{#linkTo logout}}Logout{{/linkTo}}</li>
-          {{/if}}
-        </ul>
-      </div>
-    </div>
-    {{outlet}}
-  </div>
-</script>
-    <script type="text/x-handlebars" id="home">
-  <div class="hero-unit">
-    <h1>Discover, Modify, Present</h1>
-    <p>Just register your Github Mule repositories and they will be made visible as Demos to the rest of the team!</p>
-  </div>
-</script>
-    <script type="text/x-handlebars" id="login">
-  <div class="container" style="width: 15em">
-      <form class="form-horizontal" {{action login on="submit"}}>
-        <h2>Log In</h2>
-        <div class="control-group">
-          {{input value=username type="text" placeholder="Username"}}
+        <div class="navbar-inner">
+            <ul class="nav" ng-cloak>
+                <li ng-show="signedIn()" ng-class="{ active: isActive('demos') }">
+                    <a ui-sref="demos.index">Demos</a>
+                </li>
+                <li ng-show="signedIn() && isAuthor()" ng-class="{ active: isActive('repositories') }">
+                    <a ui-sref="repositories.index">My Repositories</a>
+                </li>
+                <li ng-show="signedIn()" ng-class="{ active: isActive('snippets') }">
+                    <a ui-sref="snippets">Snippets</a>
+                </li>
+                <li ng-show="signedIn() && isAuthor()" ng-class="{ active: isActive('gists') }">
+                    <a ui-sref="gists">My Gists</a>
+                </li>
+                <li ng-class="{ active: isActive('home') }">
+                    <a ui-sref="home">Home</a>
+                </li>
+                
+            </ul>
+            <ul class="nav pull-right" ng-cloak>
+                <li class="welcome" ng-show="signedIn()" ng-cloak>{{welcome()}}</li>
+                <li class="pull-right" ng-hide="signedIn()" ng-class="{ active: isActive('login') }">
+                    <a ui-sref="login">Sign In</a>
+                </li>
+                <li class="pull-right" ng-show="signedIn()">
+                    <a ng-click="logout()">Sign Out</a>
+                </li>
+            </ul>
         </div>
-        <div class="control-group">
-          {{input value=password type="password" placeholder="Password"}}
-        </div>
-        <div class="control-group">
-          {{input class="btn btn-primary" type="submit" value="Log In"}}
-        </div>
-      </form>
-      {{#if errorMessage}}
-        <div class="alert alert-error">{{errorMessage}}</div>
-      {{/if}}
-  </div>
-</script>
-    <script type="text/x-handlebars" id="repositories">
-  <div class="container-fluid">
-    <div class="row-fluid">
-      <div class="span5">
-        <table class='table' style="height: 450px; overflow: auto">
-          <thead>
-            <tr><th>Name</th><th>Description</th></tr>
-          </thead>
-          <tbody style="height: 400px; overflow: auto">
-            {{#each controller}}
-              <tr>
-                <td>{{#linkTo 'repository' this}}{{name}} {{/linkTo}}</td>
-                <td>{{description}}</td>
-              </tr>
-            {{else}}
-              {{#if content.isLoaded}}
-                <tr>
-                  <td>No repositories found</td>
-                </tr>
-              {{/if}}
-            {{/each}}
-          </tbody>
-        </table>
-      </div>
-      <div class="span7" style="height: 450px; overflow: auto">
-        {{outlet}}
-      </div>
     </div>
-  </div>
-</script>
-    <script type="text/x-handlebars" id="readMe">
-    {{#if content.readMe}}
-      {{markdown content.readMe}}
-    {{/if}}
-  </script>
-    <script type="text/x-handlebars" id="repositories/index">
-    <p class="text-warning">Please select a Repository</p>
-  </script>
-    <script type="text/x-handlebars" id="repository">
-    <h3>{{name}}</h3>
-    <button class="btn btn-warning" {{action 'register'}}>Register</button>
-    <h2><small class='muted'>(Created {{date createdAt}})</small></h2>
-    <hr>
-    <div class='below-the-fold'>
-      {{outlet}}
     </div>
-  </script>
-    <script type="text/x-handlebars" id="demo">
-    <h3>{{name}}</h3>
-    <hr>
-    <div class='below-the-fold'>
-      {{outlet}}
-    </div>
-  </script>
-    <script type="text/x-handlebars" id="configs">
-    {{#if content.configs}}
-      {{content.configs}}
-    {{/if}}
-  </script>
-    <script type="text/x-handlebars" id="demos">
-    <div class="container-fluid">
-      <div class="row-fluid">
-        <div class="span5">
-          <table class='table' style="height: 450px; overflow: auto">
-          <thead>
-            <tr><th>Name</th><th>Summary</th></tr>
-          </thead>
-          <tbody style="height: 400px; overflow: auto">
-            {{#each controller}}
-              <tr>
-                <td>{{#linkTo 'demo' this}}{{name}} {{/linkTo}}</td>
-                <td>{{summary}}</td>
-              </tr>
-            {{else}}
-              {{#if content.isLoaded}}
-                <tr>
-                  <td>No Demos found</td>
-                </tr>
-              {{/if}}
-            {{/each}}
-          </tbody>
-        </table>
-        </div>
-        <div class="span7" style="height: 450px; overflow: auto">
-          {{outlet }}
-        </div>
-      </div>
-    </div>
-  </script>
-    <script type="text/x-handlebars" id="gists">
-    <p>Under Construction</p>
-  </script>
-    <script type="text/x-handlebars" id="snippets">
-    <p>Under Construction</p>
-  </script>
-    <script src="js/libs/jquery-1.9.1.js"></script>
-    <script src="js/libs/handlebars-1.0.rc.3.js"></script>
-    <script src="js/libs/ember-1.0.0-rc.3.js"></script>
-    <script src="js/libs/showdown.js"></script>
-    <script src="js/libs/moment.js"></script>
-    <script src="js/libs/milo.js"></script>
+    <div ui-view></div>
+
+    <script src="lib/jquery-1.9.1.js"></script>
+    <script src="lib/underscore-1.5.1.js"></script>
+    <script src="lib/angular.js"></script>
+    <script src="lib/angular-resource.js"></script>
+    
+    <script src="lib/angular-bootstrap-0.6.0.js"></script>
+    <script src="lib/restangular.js"></script>
+    <script src="lib/angular-strap-0.7.5.js"></script>
+    <script src="lib/angular-xeditable-0.1.4/js/xeditable.js"></script>
+    <script src="lib/showdown.js"></script>
+    <script src="lib/moment.js"></script>
+    <script src="lib/ui-router.js"></script>
+    <script src="lib/bootstrap.js"></script>
+    <script src="lib/high/highlight.pack.js"></script>
+    <script src="lib/bootstrap-tag-cloud.js"></script>
     <script src="js/app.js"></script>
-    <script src="js/libs/vkbeautify.0.99.00.beta.js"></script>
-    <script src="js/libs/high/highlight.pack.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/directives.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/filters.js"></script>
+
+    
 </body>
 </html>

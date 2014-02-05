@@ -1,0 +1,24 @@
+<div class="container-fluid">
+  <div class="row-fluid">
+    <div class="span5" style="height: 700px; overflow: auto">
+      <table class='table table-bordered table-hover' style="height: 750px; overflow: auto">
+        <thead>
+          <tr><th>Name</th><th>Description</th><th class="img">Published</th></tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="repository in repositories.collection.items" ng-class="{ selected : isSelected(repository) }" >
+              <td><a href="#{{repository.href}}">{{repository | data:'name'}}</a></td>
+              <td>{{repository | data:'description'}}</td>
+              <td class="img">
+                <a href="#{{repository | links:'demo'}}" ng-if="hasDemoLink(repository)" >
+                    <img class="link" src="img/check-blue.png" popover-placement="right" popover="See published Demo" popover-trigger="mouseenter"/>
+                </a>
+              </td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="span7" style="height: 750px; overflow: auto" ui-view>
+    </div>
+  </div>
+</div>
