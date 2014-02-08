@@ -2,18 +2,26 @@
 
 /* Filters */
 
-app.filter('data', function(CJService) {
+app.filter('data', function(HyperMediaService) {
     return function(entity, fieldName ) {
       if (entity) {
-          return CJService.getData(entity, fieldName);
+          return HyperMediaService.findData(entity, fieldName);
       }
     };
   });
 
-app.filter('links', function(CJService) {
+app.filter('links', function(HyperMediaService) {
     return function(entity, rel ) {
       if (entity) {
-          return CJService.getLinks(entity, rel);
+          return HyperMediaService.filterLinks(entity, rel);
+      }
+    };
+  });
+
+app.filter('link', function(HyperMediaService) {
+    return function(entity, rel ) {
+      if (entity) {
+          return HyperMediaService.findLink(entity, rel);
       }
     };
   });

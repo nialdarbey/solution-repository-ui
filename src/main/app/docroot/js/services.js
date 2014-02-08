@@ -37,71 +37,8 @@ app.factory('ErrorService', function() {
   }
 });
 
-//app.factory('DemoCorrelationService', [ '$rootScope', function($rootScope) {
-//  return {
-//    store : function(githubName, asrName) {
-//      if ($rootScope.demosMap) {
-//        // skip
-//      } else {
-//        $rootScope.repositoriesMap = JSON.parse(sessionStorage.repositoriesMap);
-//        $rootScope.demosMap = JSON.parse(sessionStorage.demosMap);
-//      }
-//      $rootScope.repositoriesMap[githubName] = asrName;
-//      $rootScope.demosMap[asrName] = githubName;
-//    },
-//    storeMap: function(publications) {
-//      if ($rootScope.demosMap && $rootScope.repositoriesMap) {
-//        // skip
-//      } else {
-//        var repositoriesMap = {};
-//        var demosMap = {};
-//        for (var i=0; i < publications.length; i++) {
-//          repositoriesMap[publications[i].asr] = publications[i].github;
-//          demosMap[publications[i].github] = publications[i].asr;
-//        }
-//        sessionStorage.setItem('demosMap', JSON.stringify(demosMap));
-//        sessionStorage.setItem('repositoriesMap', JSON.stringify(repositoriesMap));
-//      }
-//    },
-//    getAsr : function(name) {
-//      if ($rootScope.demosMap) {
-//        // skip
-//      } else {
-//        $rootScope.repositoriesMap = JSON.parse(sessionStorage.repositoriesMap);
-//        $rootScope.demosMap = JSON.parse(sessionStorage.demosMap);
-//      }
-//      return $rootScope.demosMap[name];
-//    },
-//    getRepository : function(name) {
-//      if ($rootScope.demosMap) {
-//        // skip
-//      } else {
-//        $rootScope.repositoriesMap = JSON.parse(sessionStorage.repositoriesMap);
-//        $rootScope.demosMap = JSON.parse(sessionStorage.demosMap);
-//      }
-//      return $rootScope.demosMap[name];
-//    },
-//    published : function(name) {
-//      if ($rootScope.demosMap) {
-//        // skip
-//      } else {
-//        $rootScope.repositoriesMap = JSON.parse(sessionStorage.repositoriesMap);
-//        $rootScope.demosMap = JSON.parse(sessionStorage.demosMap);
-//      }
-//      return name in $rootScope.demosMap;
-//    }
-//  }
-//} ]);
 
-// app.factory('SecurityService', [ '$rootScope', '$state', 'AuthorizationService', function($rootScope, $state, AuthorizationService) {
-//   return {
-//     check : function() {
-//       AuthorizationService.prepare();
-//     }
-//   }
-// } ]);
-
-app.factory('RepositoryService', ['CJService', 'AuthorizationService', '$resource', function(CJService, AuthorizationService, $resource) {
+app.factory('GithubService', ['HyperMediaService', 'AuthorizationService', '$resource', function(HyperMediaService, AuthorizationService, $resource) {
     var Repositories = $resource(baseUrl + 'api/users/:userId/all/demos');
     var Repository = $resource(baseUrl + 'api/users/:userId/all/demos/:name');
     return {
@@ -114,13 +51,13 @@ app.factory('RepositoryService', ['CJService', 'AuthorizationService', '$resourc
             return Repository.get({userId : username, access_token: token, name : name});
         },
         getReadMe : function(repository) {
-            var href = CJService.getLinks(repository, 'read-me');
+            var href = HyperMediaService.findLink(repository, 'read-me').href;
             return $resource(baseUrl + 'api' + href).get();
         }
     }
 }]);
 
-app.factory('DemoService', ['AuthorizationService', '$resource', function(AuthorizationService, $resource) {
+app.factory('DemoService', ['HyperMediaService', 'AuthorizationService', '$resource', function(HyperMediaService, AuthorizationService, $resource) {
     var Demos = $resource(baseUrl + 'api/demos');
     var Demo = $resource(baseUrl + 'api/demos/:name');
     return {
@@ -131,6 +68,23 @@ app.factory('DemoService', ['AuthorizationService', '$resource', function(Author
         getDemo : function(name) {
             var token = AuthorizationService.getToken();
             return Demo.get({access_token: token, name : name});
+        },
+        getTags : function(demo) {
+            var token = AuthorizationService.getToken();
+            return $resource(baseUrl + 'api').get({ access_token: token});
+        },
+        search : function(href) {
+            var token = AuthorizationService.getToken();
+            return $resource(baseUrl + 'api' + href).get({ access_token: token});
+        },
+        getReadMe : function(demo) {
+            var token = AuthorizationService.getToken();
+            var url = HyperMediaService.findLink(demo, 'read-me').href;
+            return $resource(baseUrl + 'api' + url).get({ access_token: token});
+        },
+        getConfig : function(url) {
+            var token = AuthorizationService.getToken();
+            return $resource(baseUrl + 'api' + url).get({ access_token: token});
         }
     }
 }]);
@@ -146,25 +100,39 @@ app.factory('UserService', ['$resource', function($resource) {
 }]);
 
 
-app.factory('CJService', function() {
+app.factory('HyperMediaService', ['$log', function($log) {
     return {
-        getData : function(entity, key) {
-            return _.findWhere(entity.data, { 'name': key }).value;
+        findData : function(entity, key) {
+            if (entity && entity.data) {
+                var data = _.findWhere(entity.data, { 'name': key });
+                if (data) {
+                    return data.value;
+                } else {
+                    $log.debug(data);
+                }
+            }
         },
-        getLinks : function(entity, key) {
-            if (entity.links) {
-                return _.findWhere(entity.links, { 'rel': key }).href;
+        findLink : function(entity, key) {
+            if (entity && entity.links) {
+                return _.findWhere(entity.links, { 'rel': key });
+            }
+        },
+        filterLinks : function(entity, key) {
+            if (entity && entity.links) {
+                return _.filter(entity.links, function(link) {
+                    return link.rel === key;
+                });
             }
         },
         hasLink : function(entity, key) {
-            if (entity.links) {
+            if (entity && entity.links) {
                 return typeof (_.findWhere(entity.links, { 'rel': key })) != 'undefined';
             }
         }
     }
-});
+}]);
 
-app.factory('AuthorizationService', [ 'CJService', 'UserService', '$resource', '$http', '$rootScope', '$state', 'ErrorService', function(CJService, UserService, $resource, $http, $rootScope, $state, ErrorService) {
+app.factory('AuthorizationService', [ 'HyperMediaService', 'UserService', '$resource', '$http', '$rootScope', '$state', 'ErrorService', function(HyperMediaService, UserService, $resource, $http, $rootScope, $state, ErrorService) {
   var author = false;
   var userNotRegistered = function(username, response) {
     ErrorService.setError('Sorry, ' + username + ', but you are not registered yet!');
@@ -180,7 +148,7 @@ app.factory('AuthorizationService', [ 'CJService', 'UserService', '$resource', '
       sessionStorage.setItem('token.dr', drToken.access_token);
       sessionStorage.setItem('user', JSON.stringify(user));
       $rootScope.$broadcast('SignIn');
-      $state.go('repositories.index', { username : username });
+      $state.go('my-demos.index', { username : username });
     };
   var authorizeSuccess = function(drToken, scope, self) {
       UserService.getUser(drToken.access_token, scope.username, function(user) {
@@ -190,7 +158,7 @@ app.factory('AuthorizationService', [ 'CJService', 'UserService', '$resource', '
 
   return {
     isEditor : function() {
-        return CJService.getData(this.getUser(), 'role') === 'Editor';
+        return HyperMediaService.findData(this.getUser(), 'role') === 'Editor';
     },
     getToken : function() {
         return sessionStorage.getItem('token.dr');

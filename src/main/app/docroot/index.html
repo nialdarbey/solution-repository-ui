@@ -27,20 +27,32 @@
     <div class="navbar">
         <div class="navbar-inner">
             <ul class="nav" ng-cloak>
-                <li ng-show="signedIn()" ng-class="{ active: isActive('demos') }">
-                    <a ui-sref="demos.index">Demos</a>
+                <li ng-class="{ active: isActive('home') }">
+                    <a ui-sref="home">Home</a>
                 </li>
-                <li ng-show="signedIn() && isAuthor()" ng-class="{ active: isActive('repositories') }">
-                    <a ui-sref="repositories.index">My Repositories</a>
+                <li ng-show="signedIn()" ng-class="{ active: isActive('public-demos') }">
+                    <a ui-sref="public-demos.index">Public Demos</a>
+                </li>
+                <li ng-show="signedIn() && isAuthor()" ng-class="{ active: isActive('my-demos') }">
+                    <a ui-sref="my-demos.index({ username : username() })">My Demos</a>
                 </li>
                 <li ng-show="signedIn()" ng-class="{ active: isActive('snippets') }">
                     <a ui-sref="snippets">Snippets</a>
                 </li>
-                <li ng-show="signedIn() && isAuthor()" ng-class="{ active: isActive('gists') }">
-                    <a ui-sref="gists">My Gists</a>
+                <li ng-show="signedIn()" ng-class="{ active: isActive('kicks') }">
+                    <a ui-sref="kicks">Kicks</a>
                 </li>
-                <li ng-class="{ active: isActive('home') }">
-                    <a ui-sref="home">Home</a>
+                <li ng-show="signedIn()" ng-class="{ active: isActive('videos') }">
+                    <a ui-sref="videos">Videos</a>
+                </li>
+                <li ng-show="signedIn()" ng-class="{ active: isActive('presentations') }">
+                    <a ui-sref="presentations">Presentations</a>
+                </li>
+                <li ng-show="signedIn()" ng-class="{ active: isActive('documents') }">
+                    <a ui-sref="documents">Documents</a>
+                </li>
+                <li ng-show="signedIn()" ng-class="{ active: isActive('recommended-reading') }">
+                    <a ui-sref="recommended-reading">Recommended Reading</a>
                 </li>
                 
             </ul>

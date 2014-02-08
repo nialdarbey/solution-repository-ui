@@ -5,7 +5,7 @@
     <div class="span3">
         <p class='muted'>(Published by {{demo | data:'owner'}})</p>
     </div>
-    <div class="span2 pull-right">
+    <!-- <div class="span2 pull-right">
         <div class="btn-group">
             <button class="btn btn-small dropdown-toggle" data-toggle="dropdown" href="#" ng-cloak>
                 Version {{version.major}}.{{version.minor}}.{{version.revision}} <span class="caret"></span>
@@ -14,7 +14,7 @@
                 <li ng-repeat="version in versions" ng-class="{ active: $index == 0 }"><a ng-click="chooseVersion(version)">Version {{version}}</a></li>
             </ul>
         </div>
-    </div>
+    </div> -->
 </div>
 <div class="row-fluid">
     <div class="span4">
@@ -32,17 +32,17 @@
             <small class='muted'>Tags</small>
         </h3>
         <ul class="demo-tags">
-            <li ng-repeat="tag in demo.tags" popover-placement="bottom" popover="Filter by {{tag}}" popover-trigger="mouseenter" ui-sref="demos.demo({ tags: tag })" ng-hide="$state.params.verticals">
-                <a class="tagit-label">{{tag}}</a>
+            <li ng-repeat="tag in tags" popover-placement="bottom" popover="Filter by {{tag.label}}" popover-trigger="mouseenter" ui-sref="public-demos.demo({ search: tag.href, label: tag.label })">
+                <a class="tagit-label">{{tag.label}}</a>
             </li>
         </ul>
     </div>
 </div>
 <div class="row-fluid">
     <h2>
-        <small class='muted'>Summary</small>
+        <small class='muted'>Description</small>
     </h2>
-    {{demo | data:'summary'}}
+    {{demo | data:'description'}}
 </div>
 <div class="row-fluid">
     <hr>
@@ -50,29 +50,23 @@
         <div class="tabbable">
             <!-- Only required for left/right tabs -->
             <ul class="nav nav-tabs">
-                <li class="active">
-                    <a href="/#tab-description" data-toggle="tab">Description</a>
-                </li>
-                <li><a href="/#tab-instructions" data-toggle="tab">Instructions</a></li>
+                <li class="active"><a href="/#tab-readme" data-toggle="tab">ReadMe</a></li>
                 <li><a href="/#tab-configs" data-toggle="tab">Configs</a></li>
-                <li><a href="/#tab-links" data-toggle="tab">Links</a></li>
+                <li><a href="/#tab-amazon" data-toggle="tab">Amazon</a></li>
+                <li><a href="/#tab-github" data-toggle="tab">Github</a></li>
+                
             </ul>
             <div class="tab-content">
-                <div class="tab-pane active" id="tab-description">
-                    <div showdown="demo | data:'description'"></div>
-                </div>
-                <div class="tab-pane" id="tab-instructions">
-                    <div showdown="version.releaseNotes"></div>
+                <div class="tab-pane" id="tab-readme">
+                    <div showdown="readMe.collection.items[0] | data:'readMe'"></div>
                 </div>
                 <div class="tab-pane" id="tab-configs">
                     <div class="tabbable tabs-right">
                         <ul class="nav nav-tabs">
-                            <li ng-repeat="(name,xml) in configs.configs" ng-class="{active: $index == 0}">
-                                <a href="#tab-config" data-toggle="tab" ng-click="chooseConfig(name)" popover-placement="left" popover="{{name + '.xml'}}" popover-trigger="mouseenter">{{truncatedConfigName(name)}}</a>
+                            <li ng-repeat="link in (demo | links:'mule-config')" ng-class="{active: $index == 0}">
+                                <a href="#tab-config" data-toggle="tab" ng-click="loadConfig(link.href)" popover-placement="left" popover="{{link.label}}" popover-trigger="mouseenter">{{truncatedConfigName(link.label)}}</a>
                             </li>
-                            <li ng-repeat="link in (demo | links:'config')">
-                                <a href="#">{{link}}</a>
-                            </li>
+                            
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active" id="tab-config" style="height: 400px; overflow: scroll;">
@@ -85,13 +79,17 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane" id="tab-links">
+                <div class="tab-pane" id="tab-amazon">
                     <dl class="dl-horizontal">
-                        <dt>Github</dt>
-                        <dd>{{links.github}}</dd>
                         <dt>Amazon</dt>
                         <dd ng-show="amazonAMIAssigned(links.amazon)">{{links.amazon}}</dd>
                         <dd ng-hide="amazonAMIAssigned(links.amazon)"><button class="btn btn-primary">Start Amazon</button></dd>
+                    </dl>
+                </div>
+                <div class="tab-pane" id="tab-github">
+                    <dl class="dl-horizontal">
+                        <dt>Github</dt>
+                        <dd>{{links.github}}</dd>
                     </dl>
                 </div>
             </div>

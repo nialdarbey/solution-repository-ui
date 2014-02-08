@@ -8,31 +8,33 @@ function LoginCtrl($scope, AuthorizationService) {
     }
 }
 
-function RepositoriesCtrl($stateParams, $scope, RepositoryService, AuthorizationService, CJService, $state, $location) {
+function MyDemosCtrl($stateParams, $scope, GithubService, AuthorizationService, HyperMediaService, $state, $location) {
     $scope.isSelected = function(repository) {
-        return $location.path().indexOf(CJService.getData(repository, 'name')) != -1;
+        var uri = HyperMediaService.findData(repository, 'name'); // name is uri in github. We can change it once published
+        return $location.path().indexOf(uri) != -1;
     };
     $scope.hasDemoLink = function(repository) {
-        return CJService.hasLink(repository, 'demo');
+        return HyperMediaService.hasLink(repository, 'demo');
     };
     $scope.showDemo = function(repository) {
-        var demo = CJService.getData(repository, 'name');
-        $state.go('demos.demo', {
+        var demo = HyperMediaService.findData(repository, 'name');
+        $state.go('public-demos.demo', {
             demo : demo
         });
     };
+    $scope.getDemoLink = function(repository) {
+        return HyperMediaService.getLink(repository, 'demo');
+    }
     AuthorizationService.init();
-    $scope.repositories = RepositoryService.getRepositories($stateParams.username);
+    $scope.repositories = GithubService.getRepositories($stateParams.username);
     
 }
 
-function RepositoryCtrl(RepositoryService, CJService, $scope, $stateParams, AuthorizationService, $state, ErrorService) {
+function MyDemoCtrl(GithubService, HyperMediaService, $scope, $stateParams, AuthorizationService, $state, ErrorService) {
     var publishing = false;
-    RepositoryService.getRepository($stateParams.username, $stateParams.repository).$promise.then(function(r) {
+    GithubService.getRepository($stateParams.username, $stateParams.demo).$promise.then(function(r) {
         $scope.repository = r.collection.items[0];
-        RepositoryService.getReadMe($scope.repository).$promise.then(function(readMe) {
-            $scope.readMe = readMe;
-        });
+        $scope.readMe = GithubService.getReadMe($scope.repository);
     });
     $scope.master = { name: $stateParams.repository, major: 3, minor: 4, revision: 0, verticals: [] };
 //    $scope.availableVerticals = Restangular.all('taxonomies').getList({ q: '.*', limit: 10000});
@@ -74,9 +76,6 @@ function RepositoryCtrl(RepositoryService, CJService, $scope, $stateParams, Auth
 //            });
         });
     };
-    $scope.published = function() {
-        return true;//DemoCorrelationService.published($stateParams.repository);
-    }
     $scope.reset = function() {
         publishing = false;
       $scope.demo = angular.copy($scope.master);
@@ -90,57 +89,79 @@ function RepositoryCtrl(RepositoryService, CJService, $scope, $stateParams, Auth
     });
 
     AuthorizationService.init();
-//    $scope.repository.then(function(repository) {
-//        $scope.master.name = repository.name;
-//    });
 }
 
-function DemosCtrl($location, $scope, AuthorizationService, $state, DemoService) {
+function PublicDemosCtrl($location, $scope, AuthorizationService, $state, DemoService, HyperMediaService) {
     $scope.filterOff = function() {
-        $location.path($location.path()).search({verticals:null, tags: null});
+        $location.path($location.path()).search({search:null});
     };
     $scope.isSelected = function(demo) {
-        return $location.path().indexOf(demo.id) != -1;
+        return $location.path().indexOf(HyperMediaService.findData(demo, 'name')) != -1;
     }
     $scope.isFiltered = function() {
-        return $state.params.verticals || $state.params.tags;
+        return $state.params.search;
     }
     $scope.filter = function() {
-        return ($state.params.verticals || $state.params.tags);
+        return $state.params.label;
     }
     AuthorizationService.init();
-    if ($state.params.tags) {
-        /*$scope.demos = Restangular
-            .one('demos')
-            .get({ q : $state.params.tags, limit : 0, offset : 0})
-            .get('demos');*/
-    } else if ($state.params.verticals) {
-        /*$scope.demos = Restangular
-            .one('taxonomies')
-            .one('verticals')
-            .one('nodes', $state.params.verticals)
-            .one('demos')
-            .get();*/
+    if ($state.params.search) {
+        $scope.demos = DemoService.search($state.params.search);
     } else {
-        /*$scope.demos = Restangular
-            .one('demos')
-            .get({ limit : 0, offset : 0 })
-            .get('demos');*/
         DemoService.getDemos().$promise.then(function(d) {
             $scope.demos = d;
         });
     }
 }
 
-function SearchCtrl($scope, AuthorizationService, Restangular, $stateParams, $state) {
+function PublicDemoCtrl(DemoService, HyperMediaService, $scope, $stateParams, AuthorizationService, $state, $rootScope) {
+    DemoService.getDemo($stateParams.demo).$promise.then(function(d) {
+        $scope.demo = d.collection.items[0];
+        $scope.tags = HyperMediaService.filterLinks($scope.demo, 'demo-search');
+        $scope.readMe = DemoService.getReadMe($scope.demo);
+        $scope.loadConfig(HyperMediaService.findLink($scope.demo, 'mule-config').href);
+    });
+
+    $scope.truncatedConfigName = function(name) {
+        if (name.length <= 8) {
+            return name + '.xml';
+        } else {
+            return name.substring(0, 7) + '...';
+        }
+    };
+    $scope.loadConfig = function(href) {
+        DemoService.getConfig(href).$promise.then(function(conf) {
+            $scope.currentConfig = HyperMediaService.findData(conf.collection.items[0], 'config');
+        });
+    }
+    $scope.taxonomyLabel = function(node) {
+        return node.path[node.path.length - 1];
+    }
+
+    $scope.chooseVersion = function(version) {
+        var versionResource = Restangular.one('demos', $stateParams.demo).one('vers', version);
+        $scope.version = versionResource.get(); 
+        $scope.links = versionResource.all('links').getList();
+        $scope.versionLabel = version;
+    }
+    $scope.amazonAMIAssigned = function(link) {
+        if (link) {
+            return link.indexOf('/not/filled') == -1;
+        }
+    }
+    
+    AuthorizationService.init();
+}
+
+function SearchCtrl($scope, AuthorizationService, $stateParams, $state) {
     $scope.tagMode = true;
-    $scope.tags = Restangular
-        .all('tags')
-        .getList({ q : '.*', limit : 0})
-        .get('tags');
-    $scope.verticals = Restangular
-        .all('taxonomies')
-        .getList({ q: '.*', limit: 10000});
+//    $scope.tags = Restangular
+//        .all('tags')
+//        .getList({ q : '.*', limit : 0})
+//        .get('tags');
+//    $scope.verticals = Restangular
+//        .all('taxonomies')
+//        .getList({ q: '.*', limit: 10000});
 
     $scope.search = function() {
         if ($scope.tagMode) {
@@ -169,58 +190,4 @@ function SearchCtrl($scope, AuthorizationService, Restangular, $stateParams, $st
         .then(function(v) {
                 return v[0];
             });
-}
-
-function DemoCtrl(DemoService, $scope, $stateParams, AuthorizationService, $state, DemoCorrelationService, $rootScope) {
-    DemoService.getDemo($stateParams.demo).$promise.then(function(d) {
-        $scope.demo = d.collection.items[0];
-    });
-
-    $scope.truncatedConfigName = function(name) {
-        if (name.length <= 8) {
-            return name + '.xml';
-        } else {
-            return name.substring(0, 7) + '...';
-        }
-    };
-    $scope.chooseConfig = function(name) {
-        $scope.currentConfig = $scope.configs.get('configs').get(name);
-    }
-    $scope.taxonomyLabel = function(node) {
-        return node.path[node.path.length - 1];
-    }
-
-    $scope.chooseVersion = function(version) {
-        var versionResource = Restangular.one('demos', $stateParams.demo).one('vers', version);
-        $scope.version = versionResource.get(); 
-        $scope.links = versionResource.all('links').getList();
-        $scope.versionLabel = version;
-    }
-    $scope.amazonAMIAssigned = function(link) {
-        if (link) {
-            return link.indexOf('/not/filled') == -1;
-        }
-    }
-    
-    AuthorizationService.init();
-    /*demoPromise.then(function(response) {
-        $scope.configs = Restangular.one('repositories', response.githubName).one('configs').get({
-            owner : response.githubOwner
-        });
-        $scope.configs.then(function(conf) {
-           $scope.currentConfig = conf.configs[Object.keys(conf.configs)[0]];
-        });
-    });*/
-    /*Restangular
-        .one('demos', $stateParams.demo)
-        .all('vers')
-        .getList()
-        .then(function(vs) {
-            $scope.versions = [];
-            var v = vs.versions;
-            for ( var i = 0; i < v.length; i++) {
-                $scope.versions.push(v[i].major + '.' + v[i].minor + '.' + v[i].revision);
-            }
-            $scope.chooseVersion($scope.versions[0]);
-        });*/
 }

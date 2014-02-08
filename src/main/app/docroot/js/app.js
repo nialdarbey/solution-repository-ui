@@ -14,38 +14,50 @@ app.config([ '$stateProvider', '$routeProvider', '$urlRouterProvider', '$httpPro
          .when('', '/home');
 
     $stateProvider
-        .state('repositories', {
+        .state('my-demos', {
             abstract : true,
             url : '/users/:username/all/demos',
-            templateUrl : 'partials/repositories.html',
-            controller : RepositoriesCtrl})
-        .state('repositories.index', {
+            templateUrl : 'partials/my-demos.html',
+            controller : MyDemosCtrl})
+        .state('my-demos.index', {
             url : '',
-            templateUrl : 'partials/repositories-index.html',})
-        .state('repositories.repository', {
-            url : '/:repository',
-            templateUrl : 'partials/repository.html',
-            controller : RepositoryCtrl})
-        .state('demos', {
-            abstract : true,
-            url : '/demos?tags&verticals',
-            templateUrl : 'partials/demos.html',
-            controller : DemosCtrl})
-        .state('demos.index', {
-            url : '',
-            templateUrl : 'partials/demos-index.html',})
-        .state('demos.search', {
-            url : '/search',
-            templateUrl : 'partials/demos-search-form.html',
-            controller : SearchCtrl})
-        .state('demos.demo', {
+            templateUrl : 'partials/my-demos-index.html',})
+        .state('my-demos.demo', {
             url : '/:demo',
-            templateUrl : 'partials/demo.html',
-            controller : DemoCtrl})
-        .state('gists', {
-            url : '/gists',
-            templateUrl : 'partials/under-construction.html'})
+            templateUrl : 'partials/my-demo.html',
+            controller : MyDemoCtrl})
+        .state('public-demos', {
+            abstract : true,
+            url : '/demos?search&label',
+            templateUrl : 'partials/public-demos.html',
+            controller : PublicDemosCtrl})
+        .state('public-demos.index', {
+            url : '',
+            templateUrl : 'partials/public-demos-index.html',})
+        .state('public-demos.search', {
+            url : '/search',
+            templateUrl : 'partials/public-demos-search-form.html',
+            controller : SearchCtrl})
+        .state('public-demos.demo', {
+            url : '/:demo',
+            templateUrl : 'partials/public-demo.html',
+            controller : PublicDemoCtrl})
         .state('snippets', {
+            url : '/snippets',
+            templateUrl : 'partials/under-construction.html'})
+        .state('videos', {
+            url : '/snippets',
+            templateUrl : 'partials/under-construction.html'})
+        .state('presentations', {
+            url : '/snippets',
+            templateUrl : 'partials/under-construction.html'})
+        .state('kicks', {
+            url : '/snippets',
+            templateUrl : 'partials/under-construction.html'})
+        .state('recommended-reading', {
+            url : '/snippets',
+            templateUrl : 'partials/under-construction.html'})
+        .state('documents', {
             url : '/snippets',
             templateUrl : 'partials/under-construction.html'})
         .state('login', {
@@ -69,7 +81,7 @@ app.run(['$rootScope', '$state', '$stateParams', function(editableOptions, $root
 
 
 
-app.controller('MainCtrl', [ 'CJService', '$state', '$scope', 'ErrorService', 'AuthorizationService', function( CJService, $state, $scope, ErrorService, AuthorizationService) {
+app.controller('MainCtrl', [ 'HyperMediaService', '$state', '$scope', 'ErrorService', 'AuthorizationService', function( HyperMediaService, $state, $scope, ErrorService, AuthorizationService) {
     var author = false;
     var targetIndex = 1;
     var targets = [
@@ -114,9 +126,14 @@ app.controller('MainCtrl', [ 'CJService', '$state', '$scope', 'ErrorService', 'A
     $scope.welcome = function() {
         if (AuthorizationService.getUser()) {
             var user = AuthorizationService.getUser();
-            return CJService.getData(user, 'firstName') + ' ' + CJService.getData(user, 'lastName');
+            return HyperMediaService.findData(user, 'firstName') + ' ' + HyperMediaService.findData(user, 'lastName');
         }
     };
+    
+    $scope.username = function() {
+        var user = AuthorizationService.getUser();
+        return HyperMediaService.findData(user, 'username');
+    }
     $scope.search = function() {
         if ($scope.searchCriteria.target.label === 'V') {
             $state.go('demos.index', { verticals : $scope.searchCriteria.text});

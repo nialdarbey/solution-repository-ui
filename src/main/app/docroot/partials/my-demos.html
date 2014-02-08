@@ -10,7 +10,7 @@
               <td><a href="#{{repository.href}}">{{repository | data:'name'}}</a></td>
               <td>{{repository | data:'description'}}</td>
               <td class="img">
-                <a href="#{{repository | links:'demo'}}" ng-if="hasDemoLink(repository)" >
+                <a href="#{{(repository | link:'demo').href}}" ng-if="hasDemoLink(repository)" >
                     <img class="link" src="img/check-blue.png" popover-placement="right" popover="See published Demo" popover-trigger="mouseenter"/>
                 </a>
               </td>
